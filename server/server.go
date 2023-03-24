@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"fx-bank/internal/handlers"
 	"fx-bank/middlewares"
 	"log"
 	"net/http"
@@ -14,11 +15,13 @@ import (
 type Server struct {
 	e   *gin.Engine
 	srv http.Server
+	h   *handlers.Handler
 }
 
-func New() *Server {
+func New(h *handlers.Handler) *Server {
 	return &Server{
 		e: gin.Default(),
+		h: h,
 	}
 }
 
@@ -29,6 +32,8 @@ func (s *Server) SetupMiddlewares(m []gin.HandlerFunc) {
 func (s *Server) SetupRoutes() *gin.Engine {
 	mw := []gin.HandlerFunc{middlewares.Cors()}
 	s.SetupMiddlewares(mw)
+	s.e.POST("/createAccount", s.h.CreateAccount)
+	s.e.GET("/getAccounts/:id", s.h.GetAccounts)
 	return s.e
 }
 
