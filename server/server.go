@@ -32,9 +32,16 @@ func (s *Server) SetupMiddlewares(m []gin.HandlerFunc) {
 func (s *Server) SetupRoutes() *gin.Engine {
 	mw := []gin.HandlerFunc{middlewares.Cors()}
 	s.SetupMiddlewares(mw)
-	s.e.POST("/createAccount", s.h.CreateAccount)
-	s.e.GET("/getAccounts/:id", s.h.GetAccounts)
-	s.e.POST("/transfer", s.h.TransferToAccount)
+
+	s.e.POST("/signUp", s.h.SignUp)
+	s.e.POST("/signIn", s.h.Login)
+
+	authenticatedRoutes := s.e.Group("/auth").Use(middlewares.AuthorizeJWT())
+	{
+		authenticatedRoutes.POST("/transfer", s.h.TransferToAccount)
+		authenticatedRoutes.POST("/createAccount", s.h.CreateAccount)
+		authenticatedRoutes.GET("/getAccounts/:id", s.h.GetAccounts)
+	}
 	return s.e
 }
 
