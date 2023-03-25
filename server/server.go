@@ -34,11 +34,11 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	s.SetupMiddlewares(mw)
 	s.e.POST("/createAccount", s.h.CreateAccount)
 	s.e.GET("/getAccounts/:id", s.h.GetAccounts)
+	s.e.POST("/transfer", s.h.TransferToAccount)
 	return s.e
 }
 
 func (s *Server) Start() {
-
 	s.srv = http.Server{
 		Addr:    fmt.Sprintf(":%s", os.Getenv("PORT")),
 		Handler: s.SetupRoutes(),
