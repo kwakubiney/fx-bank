@@ -22,7 +22,8 @@ func main() {
 
 	accountRepo := repository.NewAccountRepository(db)
 	transactionRepo := repository.NewTransactionRepository(db)
-	handler := handlers.NewHandler(accountRepo, transactionRepo)
+	userRepo := repository.NewUserRepository(db)
+	handler := handlers.NewHandler(accountRepo, transactionRepo, userRepo)
 
 	httpServer := server.New(handler)
 	httpServer.Start()
