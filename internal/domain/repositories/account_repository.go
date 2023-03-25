@@ -73,58 +73,6 @@ func (a *AccountRepository) FindAllAccountsByUserID(id string) ([]*models.Accoun
 	return accounts, nil
 }
 
-//func (a *AccountRepository) DepositToAccount(account *models.Account, amount int64) (int64, int64, error) {
-//	db := a.DB.Model(models.Account{}).Find(&account)
-//	if db.RowsAffected == 0 {
-//		return 0, 0, ErrAccountNotFound
-//	}
-//
-//	oldBalance := account.Balance
-//	account.Deposit(amount)
-//
-//	account.LastModified = time.Now()
-//	err := db.Model(&account).Update("balance", account.Balance).Error
-//	if err != nil {
-//		log.Println(db.Error)
-//		return 0, 0, err
-//	}
-//	err = db.Model(&account).Update("last_modified", account.LastModified).Error
-//	if err != nil {
-//		log.Println(db.Error)
-//		return 0, 0, err
-//	}
-//	newBalance := account.Balance
-//	return oldBalance, newBalance, nil
-//}
-
-//func (a *AccountRepository) WithdrawFromAccount(account *models.Account, amount int64) (int64, int64, error) {
-//	db := a.DB.Model(models.Account{}).Find(&account)
-//	if db.RowsAffected == 0 {
-//		return 0, 0, ErrAccountSenderNotFound
-//	}
-//
-//	oldBalance := account.Balance
-//	err := account.Withdraw(amount, rate)
-//	if err != nil {
-//		return 0, 0, err
-//	}
-//
-//	//TODO: Bundle both queries into one
-//	account.LastModified = time.Now()
-//	err = db.Model(&account).Update("balance", account.Balance).Error
-//	if err != nil {
-//		log.Println(db.Error)
-//		return 0, 0, err
-//	}
-//	err = db.Model(&account).Update("last_modified", account.LastModified).Error
-//	if err != nil {
-//		log.Println(db.Error)
-//		return 0, 0, err
-//	}
-//	newBalance := account.Balance
-//	return oldBalance, newBalance, nil
-//}
-
 func (a *AccountRepository) FindAccountByID(originID string, destinationID string) (*models.Account, *models.Account, error) {
 	var originAccount *models.Account
 	var destinationAccount *models.Account

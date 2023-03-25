@@ -18,15 +18,6 @@ type TransactionRepository struct {
 	DB *gorm.DB
 }
 
-//func (t *TransactionRepository) WithTrx(trxHandle *gorm.DB) *TransactionRepository {
-//	if trxHandle == nil {
-//		log.Print("Transaction Database not found")
-//		return &TransactionRepository{}
-//	}
-//	t.DB = trxHandle
-//	return t
-//}
-
 func NewTransactionRepository(db *gorm.DB) *TransactionRepository {
 	return &TransactionRepository{
 		db,
