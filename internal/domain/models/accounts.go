@@ -1,8 +1,13 @@
 package models
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"time"
+)
+
+var (
+	ErrInsufficientBalance = errors.New("insufficient balance in account")
 )
 
 type Account struct {
@@ -13,4 +18,17 @@ type Account struct {
 	CreatedAt    time.Time `json:"created_at" sql:"type:timestamp without time zone"`
 	LastModified time.Time `json:"last_modified" sql:"type:timestamp without time zone"`
 	UserID       uuid.UUID `gorm:"foreignKey:user_id" json:"user_id"`
+}
+
+func (a *Account) Deposit(amount int64) {
+	a.Balance += amount / 100
+}
+
+func (a *Account) Withdraw(amount int64, rate int64) error {
+
+	if a.Balance < (amount/100)*(rate/100) {
+		return ErrInsufficientBalance
+	}
+	a.Balance -= amount / 100
+	return nil
 }

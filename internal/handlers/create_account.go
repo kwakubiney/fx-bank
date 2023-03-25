@@ -56,7 +56,7 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 		return
 	}
 
-	account.Balance = 0
+	account.Balance = 1000
 	account.Name = createAccountRequest.Name
 	account.Currency = createAccountRequest.Currency
 	account.CreatedAt = time.Now()
