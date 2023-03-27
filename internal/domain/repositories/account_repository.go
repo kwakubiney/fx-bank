@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fx-bank/internal/domain/models"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"log"
 	"time"
@@ -88,19 +89,19 @@ func (a *AccountRepository) FindAccountByID(originID string, destinationID strin
 }
 
 func (a *AccountRepository) Transfer(sender models.Account, receiver models.Account,
-	amount int64, rate int64) error {
+	amount decimal.Decimal, rate decimal.Decimal) error {
 	err := sender.Withdraw(amount, rate)
 	if err != nil {
 		return err
 	}
-	log.Println(sender.Balance)
 	err = a.DB.Model(&sender).Update("balance", sender.Balance).Error
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	receiver.Deposit(amount)
+	valueToAdd := receiver.Deposit(amount)
+	receiver.Balance = valueToAdd
 	err = a.DB.Model(&receiver).Update("balance", receiver.Balance).Error
 	if err != nil {
 		log.Println(err)
@@ -113,7 +114,6 @@ func (a *AccountRepository) Transfer(sender models.Account, receiver models.Acco
 		return err
 	}
 
-	receiver.Deposit(amount)
 	err = a.DB.Model(&receiver).Update("last_modified", time.Now()).Error
 	if err != nil {
 		log.Println(err)

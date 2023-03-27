@@ -37,15 +37,15 @@ func (h *Handler) SignUp(c *gin.Context) {
 	if err != nil && err != repository.ErrUserAccountDoesNotExist {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Could not process request",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}
 
-	if rowsAffected > 0 && err == repository.ErrUserAccountDoesNotExist {
+	if rowsAffected > 0 {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "User already exists",
+			"message": "User with username selected already exists.",
 		})
 		return
 	}
@@ -53,7 +53,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 	createAccountErr := h.UserRepository.CreateUserAccount(&user)
 	if createAccountErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Could not create user",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}

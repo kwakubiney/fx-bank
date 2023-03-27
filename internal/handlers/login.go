@@ -38,12 +38,12 @@ func (h *Handler) Login(c *gin.Context) {
 		if err == repository.ErrUserAccountDoesNotExist {
 			log.Println(bindingErr)
 			c.JSON(http.StatusNotFound, gin.H{
-				"message": "could not find user with this username",
+				"message": "User with username selected does not exist",
 			})
 			return
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "failed to get user",
+				"message": "Could not process request. Try again later.",
 			})
 			return
 		}
@@ -55,7 +55,7 @@ func (h *Handler) Login(c *gin.Context) {
 	passErr := bcrypt.CompareHashAndPassword(userPass, dbPass)
 	if passErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Password don't match",
+			"message": "Incorrect password. Try again.",
 		})
 		return
 	}
@@ -64,14 +64,13 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to generate jwt token",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}
-
 	log.Println(user.ID)
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User successfully signed in",
+		"message": "Successfully signed in",
 		"data":    newLoginResponse(jwtToken, user.ID),
 	})
 }

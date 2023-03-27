@@ -3,6 +3,7 @@ package handlers
 import (
 	"fx-bank/internal/domain/models"
 	repository "fx-bank/internal/domain/repositories"
+	"github.com/shopspring/decimal"
 	"log"
 	"net/http"
 	"time"
@@ -24,7 +25,7 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 	if bindingErr != nil {
 		log.Println(bindingErr)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "could not parse request. check API documentation",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}
@@ -33,7 +34,7 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 	if uuidParseErr != nil {
 		log.Println(uuidParseErr)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid user id, check API documentation",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}
@@ -43,7 +44,7 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 	if err != nil && err == repository.ErrAccountNameAlreadyUsed {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "account name has been used already",
+			"message": "An account with name selected already exists",
 		})
 		return
 	}
@@ -51,28 +52,31 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "couldn't perform operation, check back later",
+			"message": "Could not process request. Try again later",
 		})
 		return
 	}
 
-	account.Balance = 1000
+	account.Balance = decimal.NewFromInt(100)
+	log.Println("Account balance", account.Balance)
 	account.Name = createAccountRequest.Name
 	account.Currency = createAccountRequest.Currency
 	account.CreatedAt = time.Now()
 	account.LastModified = time.Now()
 	account.UserID = userIdAsUUID
 
+	log.Println(account)
+
 	err = h.AccountRepository.CreateAccount(&account)
 	if err == repository.ErrAccountCannotCreated {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "could not create account, try again later",
+			"message": "Could not process request. Try again later.",
 		})
 		return
 	}
 	//TODO: Map account to new "type" and eliminate sensitive fields
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "account successfully created",
+		"message": "Account successfully created",
 		"data":    account,
 	})
 }

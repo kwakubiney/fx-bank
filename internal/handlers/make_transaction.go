@@ -3,6 +3,7 @@ package handlers
 import (
 	"fx-bank/internal/domain/models"
 	repository "fx-bank/internal/domain/repositories"
+	"github.com/shopspring/decimal"
 	"log"
 	"net/http"
 	"time"
@@ -11,11 +12,11 @@ import (
 )
 
 type TransferRequest struct {
-	ProviderName      string `json:"provider_name" binding:"required"`
-	SenderAccountID   string `json:"sender_account_id" binding:"required"`
-	ReceiverAccountID string `json:"receiver_account_id" binding:"required"`
-	Amount            int64  `json:"amount" binding:"required,gt=0"`
-	Rate              int64  `json:"rate" binding:"required"`
+	ProviderName      string          `json:"provider_name" binding:"required"`
+	SenderAccountID   string          `json:"sender_account_id" binding:"required"`
+	ReceiverAccountID string          `json:"receiver_account_id" binding:"required"`
+	Amount            decimal.Decimal `json:"amount" binding:"required,gt=0"`
+	Rate              decimal.Decimal `json:"rate" binding:"required"`
 }
 
 func (h *Handler) TransferToAccount(c *gin.Context) {
@@ -24,7 +25,7 @@ func (h *Handler) TransferToAccount(c *gin.Context) {
 	if bindingErr != nil {
 		log.Println(bindingErr)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "could not parse request, binding error",
+			"message": "Could not process request. Try again later",
 		})
 		return
 	}
@@ -37,7 +38,7 @@ func (h *Handler) TransferToAccount(c *gin.Context) {
 		if notFoundErr == repository.ErrAccountSenderNotFound {
 			log.Println(notFoundErr)
 			c.JSON(http.StatusNotFound, gin.H{
-				"message": "account sender specified was not found",
+				"message": "Account specified for sender was not found",
 			})
 			return
 		}
@@ -45,13 +46,13 @@ func (h *Handler) TransferToAccount(c *gin.Context) {
 		if notFoundErr == repository.ErrAccountReceiverNotFound {
 			log.Println(notFoundErr)
 			c.JSON(http.StatusNotFound, gin.H{
-				"message": "account receiver specified was not found",
+				"message": "Account specified for receiver was not found",
 			})
 			return
 		} else {
 			c.JSON(http.StatusInternalServerError,
 				gin.H{
-					"message": "could not get user from database",
+					"message": "Could not process request. Try again later",
 				})
 			return
 		}
@@ -71,20 +72,20 @@ func (h *Handler) TransferToAccount(c *gin.Context) {
 			log.Println(createAccountTransactionErr)
 			c.JSON(
 				http.StatusInternalServerError,
-				gin.H{"message": "failed to create transaction"},
+				gin.H{"message": "Could not process request. Try again later"},
 			)
 			return
 		}
 
 		if transferErr == models.ErrInsufficientBalance {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "could not withdraw amount due to insufficient balance",
+				"message": "Could not withdraw amount due to insufficient balance",
 			})
 			return
 		} else {
 			c.JSON(
 				http.StatusInternalServerError,
-				gin.H{"message": "settlement failed on both accounts"},
+				gin.H{"message": "Could not process request. Try again later"},
 			)
 			return
 		}
@@ -99,13 +100,13 @@ func (h *Handler) TransferToAccount(c *gin.Context) {
 	if transferSuccessTransactionRecordErr != nil {
 		log.Println(transferSuccessTransactionRecordErr)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "could not create transaction",
+			"message": "Could not process request. Try again later",
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "transfer successful",
+		"message": "Transfer successful",
 		"data":    transferRequest,
 	})
 }
@@ -115,7 +116,7 @@ func GetTransaction(transferRequest *TransferRequest, status models.Status,
 ) *models.Transaction {
 	return &models.Transaction{
 		Credit:              transferRequest.Amount,
-		Debit:               -(transferRequest.Amount),
+		Debit:               transferRequest.Amount.Neg(),
 		SenderAccountName:   senderAccount.Name,
 		ReceiverAccountName: receiverAccount.Name,
 		Rate:                transferRequest.Rate,
