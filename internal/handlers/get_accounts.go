@@ -10,7 +10,7 @@ func (h *Handler) GetAccounts(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "user id not included in path, check API documentation",
+			"message": "Could not process request. Try again later",
 		})
 		return
 	}
@@ -18,14 +18,14 @@ func (h *Handler) GetAccounts(c *gin.Context) {
 	accounts, err := h.AccountRepository.FindAllAccountsByUserID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "could not get accounts, try again later",
+			"message": "Could not process request. Try again later",
 		})
 		return
 	}
 
 	//TODO: Map account to new "type" and eliminate sensitive fields
 	c.JSON(http.StatusOK, gin.H{
-		"message": "account successfully created",
+		"message": "Account successfully retrieved",
 		"data":    accounts,
 	})
 }

@@ -32,9 +32,5 @@ func (u *UserRepository) FindUserAccountByUsername(username string) (*models.Use
 	if db.Error != nil {
 		return nil, db.Error, 0
 	}
-	if db.RowsAffected == 0 {
-		return nil, ErrUserAccountDoesNotExist, 0
-	}
-
 	return user, nil, db.RowsAffected
 }
