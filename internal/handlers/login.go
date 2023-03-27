@@ -6,6 +6,8 @@ import (
 	"fx-bank/internal/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"log"
 	"net/http"
 )
@@ -16,8 +18,9 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token  string `json:"token"`
-	UserId string `json:"user_id"`
+	Token    string `json:"token"`
+	UserId   string `json:"user_id"`
+	Username string `json:"username"`
 }
 
 func (h *Handler) Login(c *gin.Context) {
@@ -71,13 +74,14 @@ func (h *Handler) Login(c *gin.Context) {
 	log.Println(user.ID)
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Successfully signed in",
-		"data":    newLoginResponse(jwtToken, user.ID),
+		"data":    newLoginResponse(jwtToken, user.ID, cases.Title(language.English, cases.NoLower).String(user.Username)),
 	})
 }
 
-func newLoginResponse(token string, id string) *LoginResponse {
+func newLoginResponse(token string, id string, username string) *LoginResponse {
 	return &LoginResponse{
-		Token:  token,
-		UserId: id,
+		Token:    token,
+		UserId:   id,
+		Username: username,
 	}
 }
